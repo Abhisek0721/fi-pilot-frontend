@@ -1,0 +1,212 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+    --sidebar-background: 222.2 84% 4.9%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 221.2 83.2% 53.3%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-ring: 221.2 83.2% 53.3%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+    --sidebar-background: 222.2 84% 4.9%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217.2 91.2% 59.8%;
+    --sidebar-primary-foreground: 222.2 47.4% 11.2%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }
+
+/* ── Auth animations ── */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+@keyframes float-2 {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-7px); }
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.animate-float   { animation: float 6s ease-in-out infinite; }
+.animate-float-2 { animation: float-2 8s ease-in-out infinite 1.5s; }
+.animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+/* ── Auth form primitives ── */
+.auth-input {
+  display: block;
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid #E5E7EB;
+  background: #F8FAFC;
+  padding: 13px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0F172A;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.auth-input:focus {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  background: #fff;
+}
+.auth-input::placeholder { color: #94A3B8; font-weight: 400; }
+.auth-input.error {
+  border-color: #EF4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08);
+}
+
+.auth-social-btn {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid #E5E7EB;
+  background: #FFFFFF;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0F172A;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+}
+.auth-social-btn:hover {
+  border-color: #BFDBFE;
+  background: #FAFBFF;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.06);
+}
+.auth-social-btn:disabled { opacity: 0.6; cursor: default; }
+
+.auth-primary-btn {
+  width: 100%;
+  border-radius: 14px;
+  border: none;
+  background: #2563EB;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
+  padding: 14px 20px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+  letter-spacing: -0.1px;
+}
+.auth-primary-btn:hover { opacity: 0.88; box-shadow: 0 6px 24px rgba(37, 99, 235, 0.4); }
+.auth-primary-btn:disabled { opacity: 0.55; cursor: default; }
+
+/* ── Dark mode auth overrides ── */
+.dark .auth-input {
+  background: #1E293B;
+  border-color: #334155;
+  color: #F1F5F9;
+}
+.dark .auth-input:focus {
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+  background: #1E293B;
+}
+.dark .auth-input::placeholder { color: #64748B; }
+.dark .auth-social-btn {
+  background: #1E293B;
+  border-color: #334155;
+  color: #F1F5F9;
+}
+.dark .auth-social-btn:hover {
+  border-color: #3B82F6;
+  background: #263147;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.08);
+}
+
+/* ── Setup page country dropdown dark mode ── */
+.dark .setup-country-drop {
+  background: #1E293B;
+  border-color: #334155;
+}
+.dark .setup-country-drop input {
+  color: #F1F5F9;
+  background: transparent;
+}
+.dark .setup-country-drop input::placeholder { color: #64748B; }
+.dark .setup-country-drop .country-opt { color: #E2E8F0; }
+.dark .setup-country-drop .country-opt:hover { background: #263147 !important; }
+.dark .setup-country-drop .country-opt-active { background: #1E3A5F !important; }
+.dark .setup-accounting-btn { background: #1E293B !important; border-color: #334155 !important; }
+.dark .setup-accounting-btn-active { background: #1E3A5F !important; border-color: #2563EB !important; }

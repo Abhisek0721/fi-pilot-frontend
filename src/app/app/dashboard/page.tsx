@@ -99,27 +99,31 @@ export default function DashboardPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 28 }}>
         <KpiCard
           title="Revenue"
-          value="—"
+          empty
           icon={<TrendingUp size={16} />}
-          changeLabel="Upload documents to see your numbers"
+          iconColor="#2563EB"
+          iconBg="rgba(37,99,235,0.1)"
         />
         <KpiCard
           title="Expenses"
-          value="—"
+          empty
           icon={<TrendingDown size={16} />}
-          changeLabel="Upload documents to see your numbers"
+          iconColor="#EF4444"
+          iconBg="rgba(239,68,68,0.1)"
         />
         <KpiCard
           title="Net Profit"
-          value="—"
+          empty
           icon={<Receipt size={16} />}
-          changeLabel="Upload documents to see your numbers"
+          iconColor="#059669"
+          iconBg="rgba(5,150,105,0.1)"
         />
         <KpiCard
           title="GST Due"
-          value="—"
+          empty
           icon={<Landmark size={16} />}
-          changeLabel="Upload documents to see your numbers"
+          iconColor="#D97706"
+          iconBg="rgba(217,119,6,0.1)"
         />
       </div>
 

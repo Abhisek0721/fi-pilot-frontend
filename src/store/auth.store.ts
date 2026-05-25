@@ -34,6 +34,7 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'fi-pilot-auth',
       partialize: (state) => ({
+        user: state.user,
         organizationId: state.organizationId,
         organization: state.organization,
       }),

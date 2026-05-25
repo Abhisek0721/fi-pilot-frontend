@@ -13,6 +13,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
 import { useOrganization } from '@/hooks/useOrganization';
+import { BarChart2, Upload } from 'lucide-react';
+import Link from 'next/link';
 
 interface DataPoint {
   month: string;
@@ -37,6 +39,47 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
         </CardHeader>
         <CardContent>
           <div className="h-64 bg-muted rounded animate-pulse" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!data.length) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base font-semibold">Revenue vs Expenses</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div style={{
+            height: 280, display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center', gap: 14,
+          }}>
+            <div style={{
+              width: 56, height: 56, borderRadius: 16,
+              background: 'hsl(var(--muted))',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <BarChart2 size={24} style={{ color: 'hsl(var(--muted-foreground))', opacity: 0.5 }} />
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: 'hsl(var(--foreground))', margin: '0 0 4px' }}>
+                No data yet
+              </p>
+              <p style={{ fontSize: 12, color: 'hsl(var(--muted-foreground))', margin: 0, lineHeight: 1.5 }}>
+                Upload bank statements or invoices to see your revenue and expenses over time.
+              </p>
+            </div>
+            <Link href="/app/documents" style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '8px 16px', borderRadius: 8,
+              background: '#2563EB', color: 'white',
+              textDecoration: 'none', fontSize: 12, fontWeight: 700,
+            }}>
+              <Upload size={12} />
+              Upload documents
+            </Link>
+          </div>
         </CardContent>
       </Card>
     );

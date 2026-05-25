@@ -19,6 +19,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/app/dashboard', request.url));
   }
 
+  // Gate: redirect to setup if user hasn't completed org creation
+  if (isAppRoute && user && request.cookies.get('has_org')?.value !== 'true') {
+    return NextResponse.redirect(new URL('/setup', request.url));
+  }
+
   return supabaseResponse;
 }
 

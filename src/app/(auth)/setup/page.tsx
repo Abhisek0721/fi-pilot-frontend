@@ -145,7 +145,7 @@ function SearchDrop({ label, hint, selected, displayValue, options, onSelect, pl
 export default function SetupPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setOrganization } = useAuthStore();
+  const { setOrganization, setUser } = useAuthStore();
 
   const [orgName, setOrgName] = useState('');
   const [countryCode, setCountryCode] = useState('IN');
@@ -158,23 +158,25 @@ export default function SetupPage() {
   const [syncAttempt, setSyncAttempt] = useState(0);
 
   useEffect(() => {
-    setChecking(true);
-    setSyncErr(false);
-    const checkOrg = async () => {
+    let cancelled = false;
+    (async () => {
       try {
         const res = await apiClient.post('/auth/sync');
+        if (cancelled) return;
         const user = res.data.data ?? res.data;
+        if (user) setUser(user);
         if (user?.organizationMembers?.length > 0) {
+          document.cookie = 'has_org=true; path=/; max-age=31536000; SameSite=Lax';
           setOrganization(user.organizationMembers[0].organization);
           router.replace(searchParams.get('next') || '/app/dashboard');
           return;
         }
       } catch {
-        setSyncErr(true);
+        if (!cancelled) setSyncErr(true);
       }
-      setChecking(false);
-    };
-    checkOrg();
+      if (!cancelled) setChecking(false);
+    })();
+    return () => { cancelled = true; };
   }, [syncAttempt]);
 
   const countryOptions = useMemo(() =>
@@ -210,6 +212,7 @@ export default function SetupPage() {
         currency,
         accountingMethod,
       });
+      document.cookie = 'has_org=true; path=/; max-age=31536000; SameSite=Lax';
       setOrganization(org);
       router.push(searchParams.get('next') || '/app/dashboard');
     } catch {
@@ -237,7 +240,7 @@ export default function SetupPage() {
           type="button"
           className="auth-primary-btn"
           style={{ width: 'auto', padding: '11px 28px' }}
-          onClick={() => setSyncAttempt(n => n + 1)}
+          onClick={() => { setSyncErr(false); setChecking(true); setSyncAttempt(n => n + 1); }}
         >
           Retry
         </button>

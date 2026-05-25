@@ -154,8 +154,12 @@ export default function SetupPage() {
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [syncErr, setSyncErr] = useState(false);
+  const [syncAttempt, setSyncAttempt] = useState(0);
 
   useEffect(() => {
+    setChecking(true);
+    setSyncErr(false);
     const checkOrg = async () => {
       try {
         const res = await apiClient.post('/auth/sync');
@@ -165,11 +169,13 @@ export default function SetupPage() {
           router.replace(searchParams.get('next') || '/app/dashboard');
           return;
         }
-      } catch { /* show form */ }
+      } catch {
+        setSyncErr(true);
+      }
       setChecking(false);
     };
     checkOrg();
-  }, []);
+  }, [syncAttempt]);
 
   const countryOptions = useMemo(() =>
     COUNTRY_LIST.map(c => ({ code: c.code, name: c.name, sub: c.currency })),
@@ -217,6 +223,24 @@ export default function SetupPage() {
     return (
       <div style={{ textAlign: 'center', color: '#64748B', fontSize: 14, padding: '40px 0' }}>
         Setting up your account…
+      </div>
+    );
+  }
+
+  if (syncErr) {
+    return (
+      <div style={{ textAlign: 'center', padding: '40px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+        <p style={{ fontSize: 14, color: '#EF4444', fontWeight: 500, margin: 0 }}>
+          Could not connect to the server. Please check your connection and try again.
+        </p>
+        <button
+          type="button"
+          className="auth-primary-btn"
+          style={{ width: 'auto', padding: '11px 28px' }}
+          onClick={() => setSyncAttempt(n => n + 1)}
+        >
+          Retry
+        </button>
       </div>
     );
   }

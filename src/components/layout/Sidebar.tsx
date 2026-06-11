@@ -18,6 +18,7 @@ import {
   ClipboardList,
   Settings,
   TrendingUp,
+  Users,
 } from 'lucide-react';
 
 const navGroups = [
@@ -31,6 +32,7 @@ const navGroups = [
     label: 'Finance',
     items: [
       { href: '/app/invoices', label: 'Invoices', icon: FileText },
+      { href: '/app/customers', label: 'Customers', icon: Users },
       { href: '/app/bills', label: 'Bills', icon: Receipt },
       { href: '/app/bank-transactions', label: 'Bank Transactions', icon: Landmark },
       { href: '/app/documents', label: 'Documents', icon: Upload },

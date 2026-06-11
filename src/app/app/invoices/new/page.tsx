@@ -24,7 +24,7 @@ export default function NewInvoicePage() {
     mutationFn: (data: InvoiceFormValues) => invoicesApi.create(data),
     onSuccess: () => {
       toast({ title: 'Invoice created successfully' });
-      router.push('/invoices');
+      router.push('/app/invoices');
     },
     onError: (err: Error) =>
       toast({ title: 'Error creating invoice', description: err.message, variant: 'destructive' }),

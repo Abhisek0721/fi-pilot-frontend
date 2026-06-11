@@ -1,6 +1,8 @@
 'use client';
 
-import { useFieldArray, useForm } from 'react-hook-form';
+import { useState } from 'react';
+import { useFieldArray, useForm, Controller } from 'react-hook-form';
+import { useQueryClient } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -9,9 +11,20 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Plus, Trash2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { useOrganization } from '@/hooks/useOrganization';
+import { customersApi } from '@/lib/api/customers';
+import { useToast } from '@/components/ui/use-toast';
+import { CustomerCombobox } from '@/components/invoices/CustomerCombobox';
+import { CurrencyCombobox } from '@/components/ui/CurrencyCombobox';
 
 const lineItemSchema = z.object({
   description: z.string().min(1, 'Description required'),
@@ -44,12 +57,44 @@ interface InvoiceFormProps {
 export function InvoiceForm({ customers, onSubmit, loading, defaultValues }: InvoiceFormProps) {
   const { organization } = useOrganization();
   const currency = organization?.currency ?? 'INR';
+  const qc = useQueryClient();
+  const { toast } = useToast();
+
+  const [addOpen, setAddOpen] = useState(false);
+  const [addLoading, setAddLoading] = useState(false);
+  const [addForm, setAddForm] = useState({ name: '', email: '', phone: '', taxNumber: '' });
+  const [extraCustomers, setExtraCustomers] = useState<{ id: string; name: string }[]>([]);
+
+  async function handleAddCustomer() {
+    if (!addForm.name.trim()) return;
+    setAddLoading(true);
+    try {
+      const created = await customersApi.create({
+        name: addForm.name.trim(),
+        email: addForm.email.trim() || undefined,
+        phone: addForm.phone.trim() || undefined,
+        taxNumber: addForm.taxNumber.trim() || undefined,
+      });
+      setExtraCustomers(prev => [...prev, { id: created.id, name: created.name, email: created.email }]);
+      setValue('customerId', created.id, { shouldValidate: true });
+      qc.invalidateQueries({ queryKey: ['customers'] });
+      qc.invalidateQueries({ queryKey: ['customers-search'] });
+      setAddOpen(false);
+      setAddForm({ name: '', email: '', phone: '', taxNumber: '' });
+      toast({ title: 'Customer added' });
+    } catch (e: unknown) {
+      toast({ title: 'Error creating customer', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setAddLoading(false);
+    }
+  }
 
   const {
     register,
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceSchema),
@@ -79,17 +124,20 @@ export function InvoiceForm({ customers, onSubmit, loading, defaultValues }: Inv
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="customerId">Customer *</Label>
-            <select
-              id="customerId"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              {...register('customerId')}
-            >
-              <option value="">Select customer…</option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
+            <Label>Customer *</Label>
+            <Controller
+              control={control}
+              name="customerId"
+              render={({ field }) => (
+                <CustomerCombobox
+                  value={field.value}
+                  onChange={field.onChange}
+                  extraCustomers={extraCustomers}
+                  onAddCustomer={() => setAddOpen(true)}
+                  error={!!errors.customerId}
+                />
+              )}
+            />
             {errors.customerId && <p className="text-red-500 text-xs">{errors.customerId.message}</p>}
           </div>
 
@@ -116,8 +164,15 @@ export function InvoiceForm({ customers, onSubmit, loading, defaultValues }: Inv
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="currency">Currency</Label>
-            <Input id="currency" {...register('currency')} />
+            <Label>Currency</Label>
+            <Controller
+              control={control}
+              name="currency"
+              render={({ field }) => (
+                <CurrencyCombobox value={field.value} onChange={field.onChange} error={!!errors.currency} />
+              )}
+            />
+            {errors.currency && <p className="text-red-500 text-xs">{errors.currency.message}</p>}
           </div>
 
           <div className="col-span-2 space-y-2">
@@ -211,6 +266,40 @@ export function InvoiceForm({ customers, onSubmit, loading, defaultValues }: Inv
           {loading ? 'Saving…' : 'Create Invoice'}
         </Button>
       </div>
+
+      <Dialog open={addOpen} onOpenChange={open => { if (!open) { setAddOpen(false); setAddForm({ name: '', email: '', phone: '', taxNumber: '' }); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add customer</DialogTitle>
+          </DialogHeader>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div>
+              <Label htmlFor="ac-name">Name *</Label>
+              <Input id="ac-name" value={addForm.name} onChange={e => setAddForm(f => ({ ...f, name: e.target.value }))} placeholder="Acme Corp" style={{ marginTop: 6 }} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <Label htmlFor="ac-email">Email</Label>
+                <Input id="ac-email" type="email" value={addForm.email} onChange={e => setAddForm(f => ({ ...f, email: e.target.value }))} placeholder="billing@acme.com" style={{ marginTop: 6 }} />
+              </div>
+              <div>
+                <Label htmlFor="ac-phone">Phone</Label>
+                <Input id="ac-phone" value={addForm.phone} onChange={e => setAddForm(f => ({ ...f, phone: e.target.value }))} placeholder="+91 98765 43210" style={{ marginTop: 6 }} />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="ac-tax">GST / Tax Number</Label>
+              <Input id="ac-tax" value={addForm.taxNumber} onChange={e => setAddForm(f => ({ ...f, taxNumber: e.target.value }))} placeholder="22AAAAA0000A1Z5" style={{ marginTop: 6 }} />
+            </div>
+          </div>
+          <DialogFooter style={{ marginTop: 8 }}>
+            <Button variant="outline" type="button" onClick={() => setAddOpen(false)}>Cancel</Button>
+            <Button type="button" disabled={addLoading || !addForm.name.trim()} onClick={handleAddCustomer}>
+              {addLoading ? 'Saving…' : 'Add customer'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </form>
   );
 }

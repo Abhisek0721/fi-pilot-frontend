@@ -43,6 +43,11 @@ export const invoicesApi = {
     return res.data.data ?? res.data;
   },
 
+  updateStatus: async (id: string, status: string): Promise<Invoice> => {
+    const res = await apiClient.patch(`/invoices/${id}/status`, { status });
+    return res.data.data ?? res.data;
+  },
+
   getOverdue: async (): Promise<Invoice[]> => {
     const res = await apiClient.get('/invoices/overdue');
     return res.data.data ?? res.data;

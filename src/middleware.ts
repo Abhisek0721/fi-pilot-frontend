@@ -19,8 +19,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/app/dashboard', request.url));
   }
 
+  const hasOrg = request.cookies.get('has_org')?.value === 'true';
+
+  // Skip setup if org already exists
+  if (isSetupRoute && user && hasOrg) {
+    return NextResponse.redirect(new URL('/app/dashboard', request.url));
+  }
+
   // Gate: redirect to setup if user hasn't completed org creation
-  if (isAppRoute && user && request.cookies.get('has_org')?.value !== 'true') {
+  if (isAppRoute && user && !hasOrg) {
     return NextResponse.redirect(new URL('/setup', request.url));
   }
 

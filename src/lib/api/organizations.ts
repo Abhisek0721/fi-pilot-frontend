@@ -2,6 +2,11 @@ import apiClient from './client';
 import type { Organization, OrganizationMember, CreateOrganizationFormData } from '@/types';
 
 export const organizationsApi = {
+  list: async (): Promise<Organization[]> => {
+    const res = await apiClient.get('/organizations');
+    return res.data.data ?? res.data;
+  },
+
   create: async (data: CreateOrganizationFormData): Promise<Organization> => {
     const res = await apiClient.post('/organizations', data);
     return res.data.data ?? res.data;

@@ -7,31 +7,13 @@ import { useAuthStore } from '@/store/auth.store';
 import apiClient from '@/lib/api/client';
 import { countries } from 'countries-list';
 import { ChevronDown, Search } from 'lucide-react';
+import { CURRENCY_LIST } from '@/lib/currencies';
 
 // ── Data ────────────────────────────────────────────────────────────────────
 
 const COUNTRY_LIST = Object.entries(countries)
   .map(([code, c]) => ({ code, name: c.name, currency: c.currency[0] ?? '' }))
   .sort((a, b) => a.name.localeCompare(b.name));
-
-const displayNames = new Intl.DisplayNames(['en'], { type: 'currency' });
-const CURRENCY_LIST: { code: string; name: string }[] = (() => {
-  try {
-    return (Intl as any).supportedValuesOf('currency')
-      .map((code: string) => {
-        try { return { code, name: displayNames.of(code) ?? code }; }
-        catch { return { code, name: code }; }
-      })
-      .sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
-  } catch {
-    // Fallback for environments without supportedValuesOf
-    const fallback = ['AED','AFN','ALL','AMD','ANG','AOA','ARS','AUD','AWG','AZN','BAM','BBD','BDT','BGN','BHD','BIF','BMD','BND','BOB','BRL','BSD','BTN','BWP','BYR','BZD','CAD','CDF','CHF','CLP','CNY','COP','CRC','CUP','CVE','CZK','DJF','DKK','DOP','DZD','EGP','ERN','ETB','EUR','FJD','GBP','GEL','GHS','GMD','GTQ','GYD','HKD','HNL','HRK','HTG','HUF','IDR','ILS','INR','IQD','IRR','ISK','JMD','JOD','JPY','KES','KGS','KHR','KMF','KRW','KWD','KYD','KZT','LAK','LBP','LKR','LRD','LSL','LYD','MAD','MDL','MGA','MKD','MMK','MNT','MOP','MRO','MUR','MVR','MWK','MXN','MYR','MZN','NAD','NGN','NIO','NOK','NPR','NZD','OMR','PAB','PEN','PGK','PHP','PKR','PLN','PYG','QAR','RON','RSD','RUB','RWF','SAR','SBD','SCR','SDG','SEK','SGD','SHP','SLL','SOS','SRD','STD','SVC','SYP','SZL','THB','TJS','TMT','TND','TOP','TRY','TTD','TWD','TZS','UAH','UGX','USD','UYU','UZS','VEF','VND','VUV','WST','XAF','XCD','XOF','XPF','YER','ZAR','ZMW','ZWL'];
-    return fallback.map(code => {
-      try { return { code, name: displayNames.of(code) ?? code }; }
-      catch { return { code, name: code }; }
-    }).sort((a, b) => a.name.localeCompare(b.name));
-  }
-})();
 
 // ── Components ───────────────────────────────────────────────────────────────
 
@@ -145,7 +127,7 @@ function SearchDrop({ label, hint, selected, displayValue, options, onSelect, pl
 export default function SetupPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setOrganization, setUser } = useAuthStore();
+  const { setOrganization, setOrganizations, setUser } = useAuthStore();
 
   const [orgName, setOrgName] = useState('');
   const [countryCode, setCountryCode] = useState('IN');
@@ -167,6 +149,8 @@ export default function SetupPage() {
         if (user) setUser(user);
         if (user?.organizationMembers?.length > 0) {
           document.cookie = 'has_org=true; path=/; max-age=31536000; SameSite=Lax';
+          const orgs = user.organizationMembers.map((m: any) => m.organization).filter(Boolean);
+          setOrganizations(orgs);
           setOrganization(user.organizationMembers[0].organization);
           router.replace(searchParams.get('next') || '/app/dashboard');
           return;
@@ -214,6 +198,7 @@ export default function SetupPage() {
       });
       document.cookie = 'has_org=true; path=/; max-age=31536000; SameSite=Lax';
       setOrganization(org);
+      setOrganizations([...useAuthStore.getState().organizations, org]);
       router.push(searchParams.get('next') || '/app/dashboard');
     } catch {
       setErr('Failed to create organization. Please try again.');

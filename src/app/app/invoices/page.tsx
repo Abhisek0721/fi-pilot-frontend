@@ -53,6 +53,15 @@ export default function InvoicesPage() {
     onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
   });
 
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) => invoicesApi.updateStatus(id, status),
+    onSuccess: () => {
+      toast({ title: 'Invoice status updated' });
+      qc.invalidateQueries({ queryKey: ['invoices'] });
+    },
+    onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
+  });
+
   return (
     <div className="space-y-4">
       <PageHeader
@@ -91,6 +100,7 @@ export default function InvoicesPage() {
         loading={isLoading}
         onMarkSent={(id) => markSentMutation.mutate(id)}
         onMarkPaid={(id) => markPaidMutation.mutate(id)}
+        onRevertStatus={(id, status) => updateStatusMutation.mutate({ id, status })}
       />
     </div>
   );
